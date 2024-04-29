@@ -130,20 +130,10 @@ impl State{
         if self.find{
             if self.start != None {
                 let mut clone = self.clone();
-                let mut heap =  Vec::new();
-                heap.extend(clone.get_neighbours());
-                while !heap.is_empty(){
-                    if clone.is_goal(){
-                        return result;
-                    }
-                    let x = match heap.pop(){
-                        None => panic!("sorry"),
-                        Some(X) => X,
-                    };
-                    &clone.move_cleaner(x.x);
-                    result.push(x.x);
-                    heap.extend(clone.get_neighbours());
-                    heap.sort_by(|a,b|a.y.cmp(&b.y));
+                while !clone.is_goal(){
+                    let x = &clone.get_neighbours();
+                    &clone.move_cleaner(x[0].x);
+                    result.push(x[0].x);
                 }
 
             }
