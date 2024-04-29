@@ -16,6 +16,6 @@ fn main() {
     }
     println!("{}",x);
     */
-    let j = x.find_plan();
-    println!("{:?}",j);
+    //let j = x.find_plan();
+    //println!("{:?}",j);
 }

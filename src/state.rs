@@ -1,6 +1,7 @@
 use std::cmp::PartialEq;
 use std::collections::{BinaryHeap, HashSet};
 use std::fmt::{Display, Formatter};
+use std::usize::MAX;
 use crate::state::point::Point;
 
 pub mod point;
@@ -127,16 +128,20 @@ impl Store {
 impl State{
     pub fn find_plan(&self)-> Vec<char>{
         let mut result = Vec::new();
-        if self.find{
-            if self.start != None {
-                let mut clone = self.clone();
-                while !clone.is_goal(){
-                    let x = &clone.get_neighbours();
-                    &clone.move_cleaner(x[0].x);
-                    result.push(x[0].x);
+        let mut clone = self.clone();
+        while !clone.uncleaned.is_empty(){
+            let mut x = usize::MAX;
+            let mut c = ' ';
+            for i in "NEWS".chars(){
+                let mut clone2 = clone.clone();
+                clone2.move_cleaner(i);
+                if clone2.uncleaned.len() < x{
+                    x = clone2.uncleaned.len();
+                    clone = clone2;
+                    c = i;
                 }
-
             }
+            result.push(c);
         }
 
         result
