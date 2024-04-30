@@ -21,9 +21,9 @@ pub fn create_state(path: &Path) -> State{
             for c in store.chars(){
                 match c{
                     'S' => {state.start = Some(Point::new(m, n));
-                        state.cleaned.insert(Point::new(m,n));},
-                    ' ' => {state.uncleaned.insert(Point::new(m,n));},
-                    'P' => {state.portals.insert(Point::new(m,n));},
+                        state.cleaned.push(Point::new(m,n));},
+                    ' ' => {state.uncleaned.push(Point::new(m,n));},
+                    'P' => {state.portals.push(Point::new(m,n));},
                     _ => (),
                 }
                 n = n + 1usize;

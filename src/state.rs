@@ -1,17 +1,17 @@
 use std::cmp::PartialEq;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 use std::fmt::{Display, Formatter};
-use std::usize::MAX;
+use std::hash::{Hash, Hasher};
 use crate::state::point::Point;
 
 pub mod point;
 
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug,Hash,Ord, PartialOrd)]
 pub struct State {
     pub start: Option<Point>,
-    pub cleaned: HashSet<Point>,
-    pub uncleaned: HashSet<Point>,
-    pub portals: HashSet<Point>,
+    pub cleaned: Vec<Point>,
+    pub uncleaned: Vec<Point>,
+    pub portals: Vec<Point>,
     pub moves: Option<String>,
     pub check: bool,
     pub find: bool,
@@ -21,15 +21,16 @@ impl State {
     pub fn new(check: bool, find: bool) -> Self {
         State {
             start: None,
-            cleaned: HashSet::new(),
-            uncleaned: HashSet::new(),
-            portals: HashSet::new(),
+            cleaned: Vec::new(),
+            uncleaned: Vec::new(),
+            portals: Vec::new(),
             moves: None,
             check,
             find,
         }
     }
 }
+
 
 impl Display for State {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -79,8 +80,8 @@ impl State {
         } else {
             if self.uncleaned.contains(&point) {
                 self.start = Some(point);
-                self.cleaned.insert(point);
-                self.uncleaned.remove(&point);
+                self.cleaned.push(point);
+                self.uncleaned.remove(self.uncleaned.binary_search(&point).unwrap());
             } else {
                 if self.cleaned.contains(&point) {
                     self.start = Some(point);
@@ -97,7 +98,7 @@ impl State {
         self.uncleaned.is_empty()
     }
 
-    pub fn get_neighbours(&self) -> Vec<(char,State)> {
+    pub fn get_neighbours(&self) -> Vec<State> {
         let mut result = Vec::new();
         let mut sol = Vec::new();
         for i in "NEWS".chars() {
@@ -105,7 +106,7 @@ impl State {
             clone.move_cleaner(i);
             if !result.contains(&clone) && &clone != self {
                 result.push(clone.clone());
-                sol.push((i,clone));
+                sol.push(clone);
             }
         }
 
@@ -115,21 +116,11 @@ impl State {
 
 
 impl State {
-    pub fn find_plan(&self) -> Vec<char> {
+    pub fn find_plan(&mut self) -> Vec<char> {
         let mut result = Vec::new();
-        let mut clone = self.clone();
-        while !clone.is_goal() {
-            let mut n = usize::MAX;
-            let mut m = ' ';
-            for (i,j) in clone.get_neighbours(){
-                if j.heuristics() < n{
-                    n = j.heuristics();
-                    m = i;
-                }
-            }
-            result.push(m);
-            clone.move_cleaner(m);
-        }
+        let mut m = ' ';
+        let mut n:usize = 0;
+        let mut map:HashMap<State,String> = HashMap::new();
 
         result
     }
