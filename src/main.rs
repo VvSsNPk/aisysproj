@@ -4,9 +4,8 @@ use aisysproj::create_state;
 pub mod state;
 
 fn main() {
-    let path = Path::new("problem_d_03.txt");
+    let path = Path::new("problem_d_15.txt");
     let mut x = create_state(path);
-    println!("{}\n",x);
 /*    let mut str = match &x.moves{
         None => panic!("No string"),
         Some(x) => x.clone(),
@@ -16,6 +15,6 @@ fn main() {
     }
     println!("{}",x);
     */
-    //let j = x.find_plan();
-    //println!("{:?}",j);
+    let j = x.find_plan();
+    println!("{:?}",j);
 }

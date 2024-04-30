@@ -1,24 +1,25 @@
 use std::cmp::PartialEq;
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::fmt::{Display, Formatter};
 use std::usize::MAX;
 use crate::state::point::Point;
 
 pub mod point;
-#[derive(Clone)]
-pub struct State{
+
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub struct State {
     pub start: Option<Point>,
     pub cleaned: HashSet<Point>,
     pub uncleaned: HashSet<Point>,
     pub portals: HashSet<Point>,
-    pub moves : Option<String>,
+    pub moves: Option<String>,
     pub check: bool,
     pub find: bool,
 }
 
-impl  State {
-    pub fn new(check: bool, find: bool) -> Self{
-        State{
+impl State {
+    pub fn new(check: bool, find: bool) -> Self {
+        State {
             start: None,
             cleaned: HashSet::new(),
             uncleaned: HashSet::new(),
@@ -30,13 +31,12 @@ impl  State {
     }
 }
 
-impl Display for State{
+impl Display for State {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f,"start: {:?}\ncleaned: {},uncleaned: {}\nportals: {:?}\nmoves: {:?}\ncheck: {}, find: {}",
-                    self.start.unwrap(), self.cleaned.len(),self.uncleaned.len(), self.portals,self.moves, self.check, self.find)
+        write!(f, "start: {:?}\ncleaned: {},uncleaned: {}\nportals: {:?}\nmoves: {:?}\ncheck: {}, find: {}",
+               self.start.unwrap(), self.cleaned.len(), self.uncleaned.len(), self.portals, self.moves, self.check, self.find)
     }
 }
-
 
 
 impl State {
@@ -89,59 +89,46 @@ impl State {
         }
     }
 
-    pub fn heuristics(&self) -> usize{
+    pub fn heuristics(&self) -> usize {
         self.uncleaned.len()
     }
 
-    pub fn is_goal(&self) -> bool{
+    pub fn is_goal(&self) -> bool {
         self.uncleaned.is_empty()
     }
 
-    pub fn get_neighbours(&self) -> Vec<Store>{
+    pub fn get_neighbours(&self) -> Vec<(char,State)> {
         let mut result = Vec::new();
-        if self.start != None{
-            for i in "NEWS".chars(){
-                let mut clone = self.clone();
-                clone.move_cleaner(i);
-                result.push(Store::new(i,clone.heuristics()))
+        let mut sol = Vec::new();
+        for i in "NEWS".chars() {
+            let mut clone = self.clone();
+            clone.move_cleaner(i);
+            if !result.contains(&clone) && &clone != self {
+                result.push(clone.clone());
+                sol.push((i,clone));
             }
         }
-        result.sort_by(|a,b|a.y.cmp(&b.y));
-        result
+
+        sol
     }
 }
 
-#[derive(Debug,Eq,Ord,PartialEq,PartialOrd)]
-pub struct Store{
-    x:char,
-    y:usize,
-}
 
-impl Store {
-    pub fn new(x:char,y:usize) -> Self{
-        Store{
-            x,y,
-        }
-    }
-}
-
-impl State{
-    pub fn find_plan(&self)-> Vec<char>{
+impl State {
+    pub fn find_plan(&self) -> Vec<char> {
         let mut result = Vec::new();
         let mut clone = self.clone();
-        while !clone.uncleaned.is_empty(){
-            let mut x = usize::MAX;
-            let mut c = ' ';
-            for i in "NEWS".chars(){
-                let mut clone2 = clone.clone();
-                clone2.move_cleaner(i);
-                if clone2.uncleaned.len() < x{
-                    x = clone2.uncleaned.len();
-                    clone = clone2;
-                    c = i;
+        while !clone.is_goal() {
+            let mut n = usize::MAX;
+            let mut m = ' ';
+            for (i,j) in clone.get_neighbours(){
+                if j.heuristics() < n{
+                    n = j.heuristics();
+                    m = i;
                 }
             }
-            result.push(c);
+            result.push(m);
+            clone.move_cleaner(m);
         }
 
         result
