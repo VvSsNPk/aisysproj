@@ -1,5 +1,5 @@
 use std::cmp::PartialEq;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use crate::state::point::Point;
@@ -98,15 +98,17 @@ impl State {
         self.uncleaned.is_empty()
     }
 
-    pub fn get_neighbours(&self) -> Vec<(char,State)> {
+    pub fn get_neighbours(&self, mut s:String) -> Vec<(String, State)> {
         let mut result = Vec::new();
         let mut sol = Vec::new();
-        for i in "NEWS".chars() {
+        for i in "SEWN".chars() {
             let mut clone = self.clone();
             clone.move_cleaner(i);
             if !result.contains(&clone) && &clone != self {
                 result.push(clone.clone());
-                sol.push((i,clone));
+                let mut y = s.clone();
+                y.push(i);
+                sol.push((y,clone));
             }
         }
 
@@ -116,13 +118,27 @@ impl State {
 
 
 impl State {
-    pub fn find_plan(&mut self) -> Vec<char> {
-        let mut result = Vec::new();
-        let mut m = ' ';
-        let mut n:usize = 0;
-        let mut map:HashMap<State,Vec<char>> = HashMap::new();
-        map.insert(self.clone(),Vec::new());
+    pub fn find_plan(&mut self) -> String {
+        let mut map = VecDeque::new();
+        map.push_back((String::new() ,self.clone()));
+        loop{
+            let mut x = match map.pop_front(){
+                Some(Y) => Y,
+                None => break,
+            };
+            let (z,i) = x;
+            if i.is_goal(){
+                return z;
+            }
+            for st in i.get_neighbours(z){
+                println!("{:?}",st);
+                map.push_back(st);
+            }
+            let mut vec:Vec<_> = map.drain(..).collect();
+            vec.sort_by(|(_,a),(_,b)|a.uncleaned.len().cmp(&b.uncleaned.len()));
+            map = vec.into();
 
-        result
+        }
+        String::new()
     }
 }
