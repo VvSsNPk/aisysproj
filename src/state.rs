@@ -1,12 +1,12 @@
-use std::cmp::PartialEq;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::cmp::{Ordering, PartialEq, Reverse};
+use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use crate::state::point::Point;
 
 pub mod point;
 
-#[derive(Clone, Eq, PartialEq, Debug,Hash,Ord, PartialOrd)]
+#[derive(Clone, Eq, PartialEq, Debug,Hash,PartialOrd)]
 pub struct State {
     pub start: Option<Point>,
     pub cleaned: Vec<Point>,
@@ -36,6 +36,12 @@ impl Display for State {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "start: {:?}\ncleaned: {},uncleaned: {}\nportals: {:?}\nmoves: {:?}\ncheck: {}, find: {}",
                self.start.unwrap(), self.cleaned.len(), self.uncleaned.len(), self.portals, self.moves, self.check, self.find)
+    }
+}
+
+impl Ord for State{
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.uncleaned.len().cmp(&other.uncleaned.len())
     }
 }
 
@@ -101,7 +107,7 @@ impl State {
     pub fn get_neighbours(&self, mut s:String) -> Vec<(String, State)> {
         let mut result = Vec::new();
         let mut sol = Vec::new();
-        for i in "SEWN".chars() {
+        for i in "ESNW".chars() {
             let mut clone = self.clone();
             clone.move_cleaner(i);
             if !result.contains(&clone) && &clone != self {
@@ -118,27 +124,27 @@ impl State {
 
 
 impl State {
-    pub fn find_plan(&mut self) -> String {
-        let mut map = VecDeque::new();
-        map.push_back((String::new() ,self.clone()));
+    pub fn find_plan(&mut self) -> Option<String> {
+        let mut map = BinaryHeap::new();
+        map.push(Reverse((String::new() ,self.clone())));
+        let mut visited = HashSet::new();
         loop{
-            let mut x = match map.pop_front(){
+            let mut x = match map.pop(){
                 Some(Y) => Y,
                 None => break,
             };
-            let (z,i) = x;
+            let Reverse((z,i)) = x;
             if i.is_goal(){
-                return z;
+                return Some(z);
             }
-            for st in i.get_neighbours(z){
-                println!("{:?}",st);
-                map.push_back(st);
+            for (s,t) in i.get_neighbours(z){
+                if !visited.contains(&t) {
+                    visited.insert(t.clone());
+                    map.push(Reverse((s, t)));
+                }
             }
-            let mut vec:Vec<_> = map.drain(..).collect();
-            vec.sort_by(|(_,a),(_,b)|a.uncleaned.len().cmp(&b.uncleaned.len()));
-            map = vec.into();
 
         }
-        String::new()
+        None
     }
 }
