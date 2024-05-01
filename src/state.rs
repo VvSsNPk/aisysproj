@@ -98,7 +98,7 @@ impl State {
         self.uncleaned.is_empty()
     }
 
-    pub fn get_neighbours(&self) -> Vec<State> {
+    pub fn get_neighbours(&self) -> Vec<(char,State)> {
         let mut result = Vec::new();
         let mut sol = Vec::new();
         for i in "NEWS".chars() {
@@ -106,7 +106,7 @@ impl State {
             clone.move_cleaner(i);
             if !result.contains(&clone) && &clone != self {
                 result.push(clone.clone());
-                sol.push(clone);
+                sol.push((i,clone));
             }
         }
 
@@ -120,7 +120,8 @@ impl State {
         let mut result = Vec::new();
         let mut m = ' ';
         let mut n:usize = 0;
-        let mut map:HashMap<State,String> = HashMap::new();
+        let mut map:HashMap<State,Vec<char>> = HashMap::new();
+        map.insert(self.clone(),Vec::new());
 
         result
     }
