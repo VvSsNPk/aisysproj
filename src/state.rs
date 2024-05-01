@@ -131,11 +131,11 @@ impl State {
                 return z;
             }
             for st in i.get_neighbours(z){
-                println!("{:?}",st);
+                //println!("{:?}",st);
                 map.push_back(st);
             }
             let mut vec:Vec<_> = map.drain(..).collect();
-            vec.sort_by(|(_,a),(_,b)|a.uncleaned.len().cmp(&b.uncleaned.len()));
+            vec.sort_by(|(l,a),(m,b)|b.cleaned.len().cmp(&a.cleaned.len()));
             map = vec.into();
 
         }
