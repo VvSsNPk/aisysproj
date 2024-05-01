@@ -41,7 +41,7 @@ impl Display for State {
 
 impl Ord for State{
     fn cmp(&self, other: &Self) -> Ordering {
-        self.uncleaned.len().cmp(&other.uncleaned.len())
+        self.cleaned.len().cmp(&other.cleaned.len())
     }
 }
 
@@ -126,25 +126,53 @@ impl State {
 impl State {
     pub fn find_plan(&mut self) -> Option<String> {
         let mut map = BinaryHeap::new();
-        map.push(Reverse((String::new() ,self.clone())));
+        map.push(Store::new(String::new() ,self.clone()));
         let mut visited = HashSet::new();
         loop{
             let mut x = match map.pop(){
                 Some(Y) => Y,
                 None => break,
             };
-            let Reverse((z,i)) = x;
+            let Store{str:z,state:i} = x;
             if i.is_goal(){
                 return Some(z);
             }
             for (s,t) in i.get_neighbours(z){
                 if !visited.contains(&t) {
                     visited.insert(t.clone());
-                    map.push(Reverse((s, t)));
+                    map.push(Store::new(s, t));
                 }
             }
 
         }
         None
+    }
+}
+
+#[derive(Eq, PartialEq)]
+struct Store{
+    str :String,
+    state: State,
+}
+
+impl Store{
+    pub fn new(str: String, state: State) -> Self{
+        Store{
+            str,
+            state,
+        }
+    }
+}
+
+
+impl PartialOrd for Store{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.partial_cmp(other)
+    }
+}
+
+impl Ord for Store{
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.state.cmp(&other.state)
     }
 }
