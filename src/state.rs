@@ -66,8 +66,8 @@ impl State {
 
 
     pub fn checker(&mut self, point: Point) {
-        if !self.portals.is_empty() {
-            if self.portals.contains(&point) {
+         if self.portals.contains(&point) {
+             if !self.portals.is_empty(){
                 let mut m = Point { x: 0usize, y: 0usize };
                 for i in &self.portals {
                     if i != &point {
@@ -135,7 +135,7 @@ impl State {
                 map.push_back(st);
             }
             let mut vec:Vec<_> = map.drain(..).collect();
-            vec.sort_by(|(l,a),(m,b)|b.cleaned.len().cmp(&a.cleaned.len()));
+            vec.sort_by(|(l,a),(m,b)|a.uncleaned.len().cmp(&b.uncleaned.len()));
             map = vec.into();
 
         }
