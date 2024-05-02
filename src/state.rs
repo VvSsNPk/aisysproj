@@ -41,7 +41,7 @@ impl Display for State {
 
 impl Ord for State{
     fn cmp(&self, other: &Self) -> Ordering {
-        self.uncleaned.len().cmp(&other.uncleaned.len())
+        other.uncleaned.len().cmp(&self.uncleaned.len())
     }
 }
 
@@ -167,12 +167,12 @@ impl Store{
 
 impl PartialOrd for Store{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(other.state.cmp(&self.state))
+        Some(self.state.cmp(&other.state))
     }
 }
 
 impl Ord for Store{
     fn cmp(&self, other: &Self) -> Ordering {
-        other.state.cmp(&self.state)
+        self.state.cmp(&other.state)
     }
 }
