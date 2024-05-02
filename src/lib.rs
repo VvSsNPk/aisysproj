@@ -79,3 +79,18 @@ pub fn process_state_start_not_given(st: &mut State) -> HashSet<Point>{
 
     result
 }
+
+
+pub fn write_to_file(state: State, path: &mut PathBuf,filename: &str){
+    let mut p = path.clone();
+    p.push(filename);
+    let f = File::create(p)?;
+    let mut buffer = BufWriter::new(f);
+    if state.check{
+        if state.uncleaned.is_empty(){
+            writeln!(&mut buffer,"GOOD PLAN")?;
+        }else{
+            writeln!(&mut buffer,"BAD PLAN")?;
+        }
+    }
+}
