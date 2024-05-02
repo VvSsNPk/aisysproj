@@ -41,7 +41,7 @@ impl Display for State {
 
 impl Ord for State{
     fn cmp(&self, other: &Self) -> Ordering {
-        self.cleaned.len().cmp(&other.cleaned.len())
+        self.uncleaned.len().cmp(&other.uncleaned.len())
     }
 }
 
@@ -107,7 +107,7 @@ impl State {
     pub fn get_neighbours(&self, mut s:String) -> Vec<(String, State)> {
         let mut result = Vec::new();
         let mut sol = Vec::new();
-        for i in "ESNW".chars() {
+        for i in "SNWE".chars() {
             let mut clone = self.clone();
             clone.move_cleaner(i);
             if !result.contains(&clone) && &clone != self {
@@ -167,12 +167,12 @@ impl Store{
 
 impl PartialOrd for Store{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(other.cmp(self))
+        Some(other.state.cmp(&self.state))
     }
 }
 
 impl Ord for Store{
     fn cmp(&self, other: &Self) -> Ordering {
-        self.state.uncleaned.len().cmp(&other.state.uncleaned.len())
+        other.state.cmp(&self.state)
     }
 }
