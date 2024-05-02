@@ -8,5 +8,4 @@ fn main() {
     let mut x = create_state(path);
     let y = x.find_plan();
     println!("{}",y.unwrap())
-
 }
