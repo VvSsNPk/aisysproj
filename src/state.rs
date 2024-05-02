@@ -167,12 +167,12 @@ impl Store{
 
 impl PartialOrd for Store{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.partial_cmp(other))
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for Store{
     fn cmp(&self, other: &Self) -> Ordering {
-        self.state.cmp(&other.state)
+        other.state.uncleaned.len().cmp(&self.state.uncleaned.len())
     }
 }
