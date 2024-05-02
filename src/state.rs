@@ -35,7 +35,7 @@ impl State {
 impl Display for State {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "start: {:?}\ncleaned: {},uncleaned: {}\nportals: {:?}\nmoves: {:?}\ncheck: {}, find: {}",
-               self.start.unwrap(), self.cleaned.len(), self.uncleaned.len(), self.portals, self.moves, self.check, self.find)
+               self.start, self.cleaned.len(), self.uncleaned.len(), self.portals, self.moves, self.check, self.find)
     }
 }
 
@@ -124,28 +124,29 @@ impl State {
 
 
 impl State {
-    pub fn find_plan(&mut self) -> Option<String> {
-        let mut map = BinaryHeap::new();
-        map.push(Store::new(String::new() ,self.clone()));
-        let mut visited = HashSet::new();
-        loop{
-            let mut x = match map.pop(){
-                Some(Y) => Y,
-                None => break,
-            };
-            let Store{str:z,state:i} = x;
-            if i.is_goal(){
-                return Some(z);
-            }
-            for (s,t) in i.get_neighbours(z){
-                if !visited.contains(&t) {
-                    visited.insert(t.clone());
-                    map.push(Store::new(s, t));
+    pub fn find_plan(&mut self) {
+        if self.moves == None {
+            let mut map = BinaryHeap::new();
+            map.push(Store::new(String::new(), self.clone()));
+            let mut visited = HashSet::new();
+            loop {
+                let mut x = match map.pop() {
+                    Some(Y) => Y,
+                    None => break,
+                };
+                let Store { str: z, state: i } = x;
+                if i.is_goal() {
+                    self.moves = Some(z);
+                    break;
+                }
+                for (s, t) in i.get_neighbours(z) {
+                    if !visited.contains(&t) {
+                        visited.insert(t.clone());
+                        map.push(Store::new(s, t));
+                    }
                 }
             }
-
         }
-        None
     }
 }
 

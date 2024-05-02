@@ -1,14 +1,16 @@
 use std::any::Any;
+use std::collections::HashSet;
 use std::fs;
 use std::fs::{File, FileType};
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
+use serde::Serialize;
 use crate::state::point::Point;
 use crate::state::State;
 
 pub mod state;
 
-pub fn create_state(path: &Path) -> State{
+pub fn create_state(path: &PathBuf) -> State{
     let mut f = File::open(path);
     let mut state =State::new(false,false);
     let reader = BufReader::new(f.unwrap());
@@ -44,4 +46,36 @@ pub fn create_state(path: &Path) -> State{
 
 
     state
+}
+
+pub fn process_state_start_given(state: &mut State){
+    if state.check{
+        if state.moves != None{
+            let str = state.moves.clone().unwrap();
+            for i in str.chars(){
+                state.move_cleaner(i);
+            }
+        }
+    }else{
+        state.find_plan();
+    }
+}
+
+pub fn process_state_start_not_given(st: &mut State) -> HashSet<Point>{
+    let mut result = HashSet::new();
+    let unclean = st.uncleaned.clone();
+    for i in unclean{
+        let mut state = st.clone();
+        state.start = Some(i.clone());
+        state.uncleaned.remove(state.uncleaned.binary_search(&i).unwrap());
+        state.cleaned.push(i);
+        let str = state.moves.clone().unwrap();
+        for i in str.chars() {
+            state.move_cleaner(i);
+        }
+        result.extend(state.uncleaned.clone());
+    }
+
+
+    result
 }

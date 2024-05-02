@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter};
 
+
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug,Ord, PartialOrd)]
 pub struct Point{
     pub x: usize,
