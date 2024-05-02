@@ -72,8 +72,8 @@ impl State {
 
 
     pub fn checker(&mut self, point: Point) {
-        if !self.portals.is_empty() {
-            if self.portals.contains(&point) {
+        if self.portals.contains(&point) {
+            if !self.portals.is_empty(){
                 let mut m = Point { x: 0usize, y: 0usize };
                 for i in &self.portals {
                     if i != &point {
@@ -167,12 +167,12 @@ impl Store{
 
 impl PartialOrd for Store{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+        Some(other.cmp(self))
     }
 }
 
 impl Ord for Store{
     fn cmp(&self, other: &Self) -> Ordering {
-        other.state.uncleaned.len().cmp(&self.state.uncleaned.len())
+        self.state.uncleaned.len().cmp(&other.state.uncleaned.len())
     }
 }
