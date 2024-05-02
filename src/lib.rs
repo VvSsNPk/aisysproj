@@ -81,16 +81,65 @@ pub fn process_state_start_not_given(st: &mut State) -> HashSet<Point>{
 }
 
 
-pub fn write_to_file(state: State, path: &mut PathBuf,filename: &str){
-    let mut p = path.clone();
-    p.push(filename);
-    let f = File::create(p)?;
+pub fn write_to_file_start_given(state: State, path: &mut PathBuf,filename: &str) -> std::io::Result<()>{
+    create_dir_sol(path);
+    path.push(filename);
+    let f = File::create(path)?;
     let mut buffer = BufWriter::new(f);
     if state.check{
         if state.uncleaned.is_empty(){
             writeln!(&mut buffer,"GOOD PLAN")?;
         }else{
             writeln!(&mut buffer,"BAD PLAN")?;
+            for i in state.uncleaned.clone(){
+                writeln!(&mut buffer,"{}, {}",i.y,i.x)?;
+            }
+        }
+    }else{
+        writeln!(&mut buffer,"{}",state.moves.unwrap())?;
+    }
+    Ok(())
+}
+
+pub fn write_to_file_start_not_given(set:HashSet<Point>, path :&mut PathBuf, filename: &str) -> std::io::Result<()>{
+    create_dir_sol(path);
+    path.push(filename);
+    let f = File::create(path)?;
+    let mut buffer = BufWriter::new(f);
+    if set.is_empty(){
+        writeln!(&mut buffer,"GOOD PLAN")?;
+    }else{
+        writeln!(&mut buffer,"BAD PLAN")?;
+        for i in set{
+            writeln!(&mut buffer,"{}, {}",i.y,i.x)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn create_dir_sol(path: &mut PathBuf){
+    path.push("solutions");
+    if !path.exists(){
+        fs::create_dir(path).unwrap();
+    }
+}
+
+pub fn directory_parser(path: &mut PathBuf){
+    if path.is_dir(){
+        for contents in path.read_dir().expect("Cannot read directory"){
+            let mut p = contents.unwrap().path();
+            if p.is_file(){
+                let mut state = create_state(&mut p);
+                let file_name = &p.file_name().unwrap().clone().to_str().unwrap().replace("problem","solution");
+                if state.start != None{
+                    process_state_start_given(&mut state);
+                    write_to_file_start_given(state, &mut path.clone(),file_name).unwrap()
+                }else{
+                    let set = process_state_start_not_given(&mut state);
+                    write_to_file_start_not_given(set,&mut path.clone(),file_name).unwrap()
+                }
+            }
         }
     }
 }
