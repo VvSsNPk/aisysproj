@@ -167,7 +167,7 @@ impl Store{
 
 impl PartialOrd for Store{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.partial_cmp(other)
+        Some(self.partial_cmp(other))
     }
 }
 
