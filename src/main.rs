@@ -7,6 +7,5 @@ fn main() {
     let mut path = PathBuf::new();
     path.push("problem_f_09.txt");
     let mut state = create_state(&mut path);
-    let x = state.find_plan_start_state_not_given();
-    println!("{}",state.moves.unwrap())
+    println!("{:?}",state.moves)
 }
