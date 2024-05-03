@@ -71,7 +71,7 @@ impl State {
     }
 
 
-    pub fn checker(&mut self, point: Point) {
+    fn checker(&mut self, point: Point) {
         if self.portals.contains(&point) {
             if !self.portals.is_empty(){
                 let mut m = Point { x: 0usize, y: 0usize };
