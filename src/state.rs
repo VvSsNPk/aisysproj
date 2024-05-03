@@ -5,7 +5,6 @@ use std::hash::{Hash, Hasher};
 use crate::state::point::Point;
 
 pub mod point;
-pub mod elevate;
 
 #[derive(Clone, Eq, PartialEq, Debug,Hash,PartialOrd)]
 pub struct State {

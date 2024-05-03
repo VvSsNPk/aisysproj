@@ -9,6 +9,7 @@ use crate::state::point::Point;
 use crate::state::State;
 
 pub mod state;
+pub mod elevate;
 
 pub fn create_state(path: &PathBuf) -> State{
     let mut f = File::open(path);
