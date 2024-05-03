@@ -1,10 +1,12 @@
 use std::path::{PathBuf};
-use aisysproj::directory_parser;
+use aisysproj::{create_state, directory_parser};
 
 pub mod state;
 
 fn main() {
     let mut path = PathBuf::new();
-    path.push("example-problems");
-    directory_parser(&mut path);
+    path.push("problem_f_09.txt");
+    let mut state = create_state(&mut path);
+    let x = state.find_plan_start_state_not_given();
+    println!("{}",state.moves.unwrap())
 }

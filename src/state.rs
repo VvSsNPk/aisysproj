@@ -148,6 +148,71 @@ impl State {
             }
         }
     }
+
+    pub fn next_possible_states(&mut self) -> HashSet<State>{
+        let mut result = HashSet::new();
+        if self.find {
+            if self.start == None {
+                if !self.uncleaned.is_empty() {
+                    for i in self.uncleaned.clone() {
+                        let mut state = self.clone();
+                        state.start = Some(i);
+                        state.uncleaned.remove(state.uncleaned.binary_search(&i).unwrap());
+                        state.cleaned.push(i);
+                        result.insert(state);
+                    }
+                }
+            }
+        }
+        result
+    }
+
+
+    pub fn find_plan_start_state_not_given(&mut self){
+        if self.find && self.start==None{
+        let mut visited = HashSet::new();
+        let mut fringe = BinaryHeap::new();
+        for i in self.next_possible_states(){
+            fringe.push(Store2{str:String::new(),state:i});
+        }
+            loop {
+                let mut x = match fringe.pop() {
+                    Some(Y) => Y,
+                    None => break,
+                };
+                let Store2 { str: mut z, state: i } = x;
+                if self.state_start_check(&mut z) {
+                    self.moves = Some(z);
+                    break;
+                }
+                for (s, t) in i.get_neighbours(z) {
+                    if !visited.contains(&t) {
+                        visited.insert(t.clone());
+                        fringe.push(Store2::new(s, t));
+                    }
+                }
+            }
+
+        }
+    }
+
+
+    pub fn check_string(mut state: State, str:&mut String) -> bool{
+        for i in str.clone().chars(){
+            state.move_cleaner(i);
+        }
+        return state.uncleaned.is_empty();
+    }
+
+    pub fn state_start_check(&mut self,str: &mut String) -> bool{
+        let mut store = self.next_possible_states();
+        for i in store{
+            if !State::check_string(i,str){
+                return false;
+            }
+        }
+        true
+    }
 }
 
 #[derive(Eq, PartialEq)]
@@ -175,5 +240,32 @@ impl PartialOrd for Store{
 impl Ord for Store{
     fn cmp(&self, other: &Self) -> Ordering {
         self.state.cmp(&other.state)
+    }
+}
+#[derive(Eq, PartialEq)]
+struct Store2{
+    str: String,
+    state: State,
+}
+
+impl Store2{
+    pub fn new(str: String, state: State) -> Self{
+        Store2{
+            str,
+            state,
+        }
+    }
+}
+
+
+impl PartialOrd for Store2{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(other.state.uncleaned.len().cmp(&self.state.uncleaned.len()))
+    }
+}
+
+impl Ord for Store2{
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.state.uncleaned.len().cmp(&self.state.uncleaned.len())
     }
 }
