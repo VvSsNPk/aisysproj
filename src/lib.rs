@@ -200,4 +200,11 @@ impl Speicher{
             uncleaned: Vec::new(),
         }
     }
+
+    pub fn change_start(&mut self, point: Point){
+        self.start = point;
+        if self.uncleaned.contains(&point){
+            self.uncleaned.remove(self.uncleaned.binary_search(&point).unwrap());
+        }
+    }
 }
