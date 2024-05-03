@@ -1,15 +1,15 @@
 use std::any::Any;
 use std::collections::HashSet;
+use std::fmt::{Display, Formatter};
 use std::fs;
 use std::fs::{File, FileType};
 use std::io::{BufRead, BufReader, BufWriter, Write};
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use serde::Serialize;
 use crate::state::point::Point;
 use crate::state::State;
 
 pub mod state;
-pub mod elevate;
 
 pub fn create_state(path: &PathBuf) -> State{
     let mut f = File::open(path);
@@ -141,6 +141,63 @@ pub fn directory_parser(path: &mut PathBuf){
                     write_to_file_start_not_given(set,&mut path.clone(),file_name).unwrap()
                 }
             }
+        }
+    }
+}
+
+
+
+pub struct ElevateMap{
+    pub map: Vec<Speicher>,
+}
+
+impl ElevateMap{
+    pub fn new() -> Self{
+        ElevateMap{
+            map : Vec::new(),
+        }
+    }
+
+    pub fn create(state: &mut State) -> Option<Self>{
+        if state.start == None {
+            let mut map = ElevateMap::new();
+            let mut uncleaned = state.uncleaned.clone();
+            for i in uncleaned{
+                let mut speicher = Speicher::new(i.x, i.y);
+                let mut uncleaned = state.uncleaned.clone();
+                uncleaned.remove(state.uncleaned.binary_search(&i).unwrap());
+                speicher.uncleaned.extend(uncleaned);
+                map.map.push(speicher);
+            }
+            return Some(map)
+        }else {
+            None
+        }
+    }
+}
+
+impl Display for ElevateMap {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f,"{}",self.map.len())
+    }
+}
+
+
+
+pub struct Speicher{
+    pub start: Point,
+    pub uncleaned: Vec<Point>,
+}
+impl Display for Speicher{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f,"{},{}",self.start,self.uncleaned.len())
+    }
+}
+impl Speicher{
+    pub fn new(x: usize,y:usize) -> Self{
+        Speicher{
+            start:Point::new(x,y),
+            uncleaned: Vec::new(),
         }
     }
 }
