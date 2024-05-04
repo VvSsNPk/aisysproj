@@ -3,10 +3,9 @@ use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet};
 use std::fmt::{Display, Formatter};
 use std::fs;
-use std::fs::{File, FileType};
+use std::fs::{File};
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::{PathBuf};
-use serde::de::Unexpected::Str;
 use serde::Serialize;
 use crate::state::point::Point;
 use crate::state::State;
@@ -221,8 +220,10 @@ impl ElevateMap{
             let mut y = s.clone();
             let mut x = self.clone();
             x.move_cleaner(i);
-            y.push(i);
-            result.push((y,x));
+            if x!= *self {
+                y.push(i);
+                result.push((y, x));
+            }
 
 
         }
