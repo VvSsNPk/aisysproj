@@ -182,7 +182,7 @@ impl ElevateMap{
     pub fn move_cleaner(&mut self, c :char){
         let portals = self.state.portals.clone();
         for  i in &mut self.map{
-            let mut point = i.start;
+            let mut point = i.start.clone();
             if point.x != 0usize && point.x != 11usize && point.y != 0usize && point.y != 17usize {
                 match c {
                     'N' => point.x = point.x - 1usize,
@@ -192,17 +192,14 @@ impl ElevateMap{
                     _ => (),
                 }
             }
-            if i.uncleaned.contains(&point){
-                let mut unclean = &mut i.uncleaned;
-                unclean.remove(i.uncleaned.binary_search(&point).unwrap());
-            }
             if portals.contains(&point){
-                for j in portals{
+                for j in portals.clone(){
                     if j != point{
                         point = j.clone();
                     }
                 }
             }
+            i.change_start(point,&portals);
         }
     }
 }
@@ -232,10 +229,12 @@ impl Speicher{
         }
     }
 
-    pub fn change_start(&mut self, point: Point){
-        self.start = point;
-        if self.uncleaned.contains(&point){
-            self.uncleaned.remove(self.uncleaned.binary_search(&point).unwrap());
+    pub fn change_start(&mut self, point: Point,portals:& Vec<Point>){
+        if self.uncleaned.contains(&point) || portals.contains(&point){
+            self.start = point;
+            if self.uncleaned.contains(&point) {
+                self.uncleaned.remove(self.uncleaned.binary_search(&point).unwrap());
+            }
         }
     }
 }

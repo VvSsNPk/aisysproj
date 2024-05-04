@@ -9,6 +9,9 @@ fn main() {
     let mut state = create_state(&mut path);
     let mut st = ElevateMap::create(&mut state);
     let mut el = st.unwrap();
-    el.move_cleaner('N');
+    el.move_cleaner('W');
+    for i in el.map{
+        println!("{}",i);
+    }
 
 }
