@@ -7,6 +7,8 @@ fn main() {
     let mut path = PathBuf::new();
     path.push("problem_f_09.txt");
     let mut state = create_state(&mut path);
-    println!("{}",state.uncleaned.len());
-    let st = ElevateMap::create(&mut state);
+    let mut st = ElevateMap::create(&mut state);
+    let mut el = st.unwrap();
+    el.move_cleaner('N');
+
 }

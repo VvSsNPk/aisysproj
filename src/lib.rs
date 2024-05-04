@@ -146,15 +146,18 @@ pub fn directory_parser(path: &mut PathBuf){
 }
 
 
-
+#[derive(Clone)]
 pub struct ElevateMap{
     pub map: Vec<Speicher>,
+    pub state: State,
 }
 
 impl ElevateMap{
-    pub fn new() -> Self{
+    fn new() -> Self{
         ElevateMap{
             map : Vec::new(),
+            state: State::new(false,true),
+
         }
     }
 
@@ -162,6 +165,7 @@ impl ElevateMap{
         if state.start == None {
             let mut map = ElevateMap::new();
             let mut uncleaned = state.uncleaned.clone();
+            map.state = state.clone();
             for i in uncleaned{
                 let mut speicher = Speicher::new(i.x, i.y);
                 let mut uncleaned = state.uncleaned.clone();
@@ -174,16 +178,43 @@ impl ElevateMap{
             None
         }
     }
+
+    pub fn move_cleaner(&mut self, c :char){
+        let portals = self.state.portals.clone();
+        for  i in &mut self.map{
+            let mut point = i.start;
+            if point.x != 0usize && point.x != 11usize && point.y != 0usize && point.y != 17usize {
+                match c {
+                    'N' => point.x = point.x - 1usize,
+                    'S' => point.x = point.x + 1usize,
+                    'E' => point.y = point.y + 1usize,
+                    'W' => point.y = point.y - 1usize,
+                    _ => (),
+                }
+            }
+            if i.uncleaned.contains(&point){
+                let mut unclean = &mut i.uncleaned;
+                unclean.remove(i.uncleaned.binary_search(&point).unwrap());
+            }
+            if portals.contains(&point){
+                for j in portals{
+                    if j != point{
+                        point = j.clone();
+                    }
+                }
+            }
+        }
+    }
 }
 
-impl Display for ElevateMap {
+impl Display for ElevateMap{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f,"{}",self.map.len())
+        write!(f,"{},{}",self.map.len(),self.state)
     }
 }
 
 
-
+#[derive(Clone)]
 pub struct Speicher{
     pub start: Point,
     pub uncleaned: Vec<Point>,

@@ -46,6 +46,8 @@ impl Ord for State{
 }
 
 
+
+
 impl State {
     pub fn move_cleaner(&mut self, c: char) {
         if self.start != None {
