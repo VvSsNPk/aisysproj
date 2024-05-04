@@ -122,10 +122,6 @@ impl State {
 
         sol
     }
-
-    pub fn get_portals(&self,point: Point) -> Vec<Point>{
-        self.portals.clone()
-    }
 }
 
 

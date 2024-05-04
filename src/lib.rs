@@ -1,10 +1,12 @@
 use std::any::Any;
-use std::collections::HashSet;
+use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashSet};
 use std::fmt::{Display, Formatter};
 use std::fs;
 use std::fs::{File, FileType};
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::{PathBuf};
+use serde::de::Unexpected::Str;
 use serde::Serialize;
 use crate::state::point::Point;
 use crate::state::State;
@@ -146,7 +148,7 @@ pub fn directory_parser(path: &mut PathBuf){
 }
 
 
-#[derive(Clone)]
+#[derive(Clone,Eq, PartialEq,Hash)]
 pub struct ElevateMap{
     pub map: Vec<Speicher>,
     pub state: State,
@@ -202,6 +204,77 @@ impl ElevateMap{
             i.change_start(point,&portals);
         }
     }
+
+
+    fn is_goal(&self)-> bool{
+        for i in &self.map{
+            if !i.uncleaned.is_empty(){
+                return false;
+            }
+        }
+        true
+    }
+
+    fn get_neighbours(&self,mut s:String) -> Vec<(String,ElevateMap)>{
+        let mut result = Vec::new();
+        for i in "NEWS".chars(){
+            let mut y = s.clone();
+            let mut x = self.clone();
+            x.move_cleaner(i);
+            y.push(i);
+            result.push((y,x));
+
+
+        }
+        result
+    }
+
+    pub fn find_plan(&mut self) -> String{
+        let mut frontier = BinaryHeap::new();
+        frontier.push(Pair::new(String::new(),self.clone()));
+        let mut visited = HashSet::new();
+        loop {
+            let mut x = match frontier.pop(){
+                Some(y) => y,
+                None => break,
+            };
+            let Pair{str,map} =x;
+            println!("{}",str);
+            if map.is_goal(){
+                return str;
+            }
+            for (f,k) in map.get_neighbours(str){
+                if !visited.contains(&k){
+                    visited.insert(k.clone());
+                    frontier.push(Pair::new(f,k));
+                }
+            }
+        }
+
+
+
+        String::new()
+    }
+}
+
+impl Ord for ElevateMap{
+    fn cmp(&self, other: &Self) -> Ordering {
+        let mut count = 0;
+        let mut count2 = 0;
+        for i in &self.map{
+            count += i.uncleaned.len();
+        }
+        for i in &other.map{
+            count2 += i.uncleaned.len();
+        }
+        count2.cmp(&count)
+    }
+}
+
+impl PartialOrd for ElevateMap{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(&other))
+    }
 }
 
 impl Display for ElevateMap{
@@ -211,7 +284,7 @@ impl Display for ElevateMap{
 }
 
 
-#[derive(Clone)]
+#[derive(Clone,Ord, PartialOrd, Eq, PartialEq,Hash)]
 pub struct Speicher{
     pub start: Point,
     pub uncleaned: Vec<Point>,
@@ -236,5 +309,31 @@ impl Speicher{
                 self.uncleaned.remove(self.uncleaned.binary_search(&point).unwrap());
             }
         }
+    }
+}
+#[derive(Eq, PartialEq,Hash)]
+struct Pair{
+    str: String,
+    map :ElevateMap,
+}
+
+impl Pair{
+    pub fn new(str:String,map:ElevateMap) -> Self{
+        Pair{
+            str,
+            map,
+        }
+    }
+}
+
+impl PartialOrd for Pair{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.map.cmp(&other.map))
+    }
+}
+
+impl Ord for Pair{
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.map.cmp(&other.map)
     }
 }
