@@ -205,13 +205,23 @@ impl ElevateMap{
     }
 
 
-    fn is_goal(&self)-> bool{
-        for i in &self.map{
-            if !i.uncleaned.is_empty(){
-                return false;
+    fn is_goal(&self,s:&String)-> bool{
+        if self.state.start ==None{
+            let mut uncleaned = self.state.uncleaned.clone();
+            for i in uncleaned{
+                let mut state = self.state.clone();
+                state.start = Some(i);
+                for j in s.clone().chars(){
+                    state.move_cleaner(j);
+                }
+                if !state.uncleaned.is_empty(){
+                    return false;
+                }
             }
+            return true
+        }else {
+            false
         }
-        true
     }
 
     fn get_neighbours(&self,mut s:String) -> Vec<(String,ElevateMap)>{
@@ -241,7 +251,7 @@ impl ElevateMap{
             };
             let Pair{str,map} =x;
             println!("{}",str);
-            if map.is_goal(){
+            if map.is_goal(&str){
                 return str;
             }
             for (f,k) in map.get_neighbours(str){
@@ -268,7 +278,7 @@ impl Ord for ElevateMap{
         for i in &other.map{
             count2 += i.uncleaned.len();
         }
-        count2.cmp(&count)
+        count.cmp(&count2)
     }
 }
 
