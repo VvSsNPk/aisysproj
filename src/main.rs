@@ -9,7 +9,10 @@ fn main() {
     let mut state = create_state(&mut path);
     let mut st = ElevateMap::create(&mut state);
     let mut el = st.unwrap();
-    let x = el.find_plan();
-    println!("answer is :   {}",x);
-
+    for i in "ENNNSSSWESNWEENNWNSSEESWWNNSESSWWESNNEES".chars(){
+        el.move_cleaner(i)
+    }
+    for j in el.map{
+        println!("{}",j);
+    }
 }

@@ -192,15 +192,16 @@ impl ElevateMap{
                     'W' => point.y = point.y - 1usize,
                     _ => (),
                 }
-            }
-            if portals.contains(&point){
-                for j in portals.clone(){
-                    if j != point{
-                        point = j.clone();
+                if portals.contains(&point){
+                    for j in portals.clone(){
+                        if j != point{
+                            point = j.clone();
+                        }
                     }
                 }
+                i.change_start(point,&portals);
             }
-            i.change_start(point,&portals);
+
         }
     }
 
