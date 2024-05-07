@@ -293,13 +293,13 @@ impl Ord for ElevateMap{
         for i in &other.map{
             count2 += i.uncleaned.len();
         }
-        count.cmp(&count2)
+        count2.cmp(&count)
     }
 }
 
 impl PartialOrd for ElevateMap{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(other.cmp(&self))
+        Some(self.cmp(&self))
     }
 }
 
@@ -360,12 +360,12 @@ impl Pair{
 
 impl PartialOrd for Pair{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(other.map.cmp(&self.map))
+        Some(self.map.cmp(&other.map))
     }
 }
 
 impl Ord for Pair{
     fn cmp(&self, other: &Self) -> Ordering {
-        other.map.cmp(&self.map)
+        self.map.cmp(&other.map)
     }
 }
